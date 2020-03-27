@@ -1,0 +1,104 @@
+<div id="grid-table-panel" class="panel panel-default">
+     <div class="">  
+          <div class="col-xs-12 col-sm-6 col-md-6 pl-0">
+               <h4 class="grid-table-headings">{{tableHeading}}</h4>
+          </div>
+          
+          <div class="col-xs-12 col-sm-6 col-md-6">
+               <div class="row">
+                    <div class="col-md-6 text-right"></div>
+                    
+                    <div class="col-md-6 pr-0">
+                         
+                         
+                         <div *ngIf="enableSearch" class="filter">
+                              <div class="input-group">
+                                   <input type="search" (keyup)="onKey()" 
+                                   [(ngModel)]="searchText" class="form-control"
+                                   style="border-right-width: inherit;" 
+                                   placeholder="Search">
+                                   <span (click)="onKey()" class="input-group-addon">
+                                        <i class="fa fa-search"></i>
+                                   </span> 
+                              </div>
+                         </div>            
+                    </div>
+                    
+               </div>
+          </div>
+     </div>
+</div>
+
+<div>
+     <div class="grid-table">
+          <div class="table-inner">
+               <table class="table table-responsive table-bordered table-striped table-hover">
+                    <thead class="theadclass">
+                         <tr>
+                              <th class='text-center sticky' *ngIf="showselection">
+                                   <input type="checkbox" class="checkbox" [checked]="isAllRowsChecked()" (change)="onCheckAll($event)">
+                              </th>
+                              <th *ngFor="let col of columns" (click)="sort(col.fieldName, col.dataType)" class='{{col.headercss}} sticky'>
+                                   {{col.name }}
+                                   <i *ngIf="enableSorting && !col.icon" [ngClass]="setCurrentClasses(col.fieldName)" aria-hidden="true"></i>
+                              </th>
+                         </tr>
+                    </thead>
+                    
+                    <tbody>
+                         <tr  *ngFor="let data of tableData; let i=index;last as isLast" [class.footer]="isLast && showfooter" 
+                         (click)="setClickedRow(i, data[uniqueKey],data)" 
+                         [class.highlighted]="i == highlightedRow">
+                         <td class='text-center' *ngIf="showselection">
+                              <input type="checkbox" class="checkbox" [(ngModel)]="data.state" 
+                              (change)="onChecked($event,i, data[uniqueKey], data)">
+                         </td>
+                         <td   class="{{col.headercss}}" *ngFor=" let col of columns">
+                              <a [class.disabled]="col.isEnabled==false" class="pointer" *ngIf='col.icon' style="margin-left:5px;" (click)="onClickedIcon($event,data[uniqueKey], col.name,data,col.headercss);">
+                                   <i class="{{col.icon}}"></i></a>
+                                   <span *ngIf="col.dataType === 'date' && col.navigation === ''">{{ data[col.fieldName] | date: format}}</span>
+                                   <span *ngIf="col.dataType === 'arrow' && col.navigation === ''">{{ data[col.fieldName]}}
+                                        <i *ngIf="data[col.fieldName] < 0" class="up" [ngStyle]="{'color': 'green'}"></i>
+                                        <i *ngIf="data[col.fieldName] >= 0" class="up" [ngStyle]="{'color': 'red' }"></i></span>
+                                        <span  *ngIf="col.dataType !== 'date' && col.dataType !== 'arrow' && col.dataType !== 'number' && col.navigation === ''">{{ data[col.fieldName]}}</span>
+                                        
+                                   </td>
+                              </tr>
+                              
+                         </tbody>
+                         
+                    </table>
+                    <div *ngIf="this.tableData.length == 0" class="no-data">
+                         {{StatusMessage}}
+                    </div>
+               </div>
+               
+               <div class="panel panel-default pagination" *ngIf="pagination">
+                    <div class="panel-footer text-left">
+                         
+                         <span *ngIf="showpagesize">
+                              PageSize:
+                              <select class="pageSize" [(ngModel)]="pagesize" (change)="pageSizeChanged();">
+                                   <option value="5" text="5">5</option>
+                                   <option value="10" text="10">10</option>
+                                   <option value="50" text="50">50</option>
+                                   <option value="100" text="100">100</option>
+                              </select>
+                         </span>
+                         <button type="button" title="First Page" (click)="pageSizeChanged();" class="btn btn-sm pagebtn"><i class="glyphicon glyphicon-step-backward"></i></button>
+                         <button type="button" title="Previous Page" (click)="previousPage();" class="btn btn-sm pagebtn"><i class="glyphicon glyphicon-triangle-left"></i></button>
+                         <input min="{{min}}" max="{{max}}" type="number" class="page" [(ngModel)]="currentPage"
+                         (keyup)="go()" (mouseup)="go()"> / <span>{{ TotalItem === undefined || TotalItem === 0 ? 1 : math.ceil(TotalItem / pagesize) }}</span>
+                         <button type="button" title="Next Page" (click)="nextPage();" class="btn btn-sm pagebtn"><i class="glyphicon glyphicon-triangle-right"></i></button>
+                         <button type="button" title="Last Page" (click)="lastPage();" class="btn btn-sm pagebtn"><i class="glyphicon glyphicon-step-forward"></i></button>
+                         
+                         <div class="total-items">
+                              <span>TotalItems: {{TotalItem}}</span>
+                         </div>
+                    </div>
+               </div>
+          </div>
+     </div>
+     
+     
+     
